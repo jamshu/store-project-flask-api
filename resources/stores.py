@@ -1,21 +1,21 @@
 from flask import request
 from db import stores
-import uuid
 from flask_smorest import abort, Blueprint
 from flask.views import MethodView
-from schemas import StoreSchema
+from schemas import StoreSchema,PlainStoreSchema
+from db import db
+from models import StoreModel
+from sqlalchemy.exc import SQLAlchemyError
 
 blp = Blueprint("Stores", "stores", description="Operates on stores in database")
 
 
 @blp.route('/store/<string:store_id>')
 class Store(MethodView):
-
+    @blp.response(200, PlainStoreSchema)
     def get(self, store_id):
-        try:
-            return stores[store_id]
-        except KeyError:
-            abort(404, "Store Not found")
+        store = StoreModel.query.get_or_404(store_id)
+        return store
 
     def put(self, store_id):
         data = request.get_json()
@@ -27,27 +27,27 @@ class Store(MethodView):
             abort(404, "Store not Found")
 
     def delete(self, store_id):
-        try:
-            del stores[store_id]
-            return {}
-        except KeyError:
-            abort(404, "Store Not Found")
+        store = StoreModel.query.get_or_404(store_id)
+        db.session.delete(store)
+        db.session.commit()
+        return {"message": "Store deleted successfully"}
 
 
 @blp.route("/store/")
 class StoreList(MethodView):
     
-    @blp.response(200, StoreSchema(many=True))
+    @blp.response(200, PlainStoreSchema(many=True))
     def get(self):
-        print(stores.values())
-        return stores.values()
+        return StoreModel.query.all()
     
     @blp.arguments(StoreSchema)
-    @blp.response(200, StoreSchema)
+    @blp.response(201, StoreSchema)
     def post(self, store_data):
-        print("store data",store_data)
-        # store_data = request.get_json()
-        store_id = uuid.uuid4().hex
-        new_store = {**store_data, "id": store_id}
-        stores[store_id] = new_store
-        return new_store, 201
+        store = StoreModel(**store_data)
+        try:
+            db.session.add(store)
+            db.session.commit()
+        except SQLAlchemyError as error:
+            abort(500, message="Error while creating Store {}".format(error))
+       
+        return store

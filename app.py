@@ -4,8 +4,6 @@ from flask_smorest import Api
 from resources.items import blp as ItemBlueprint
 from resources.stores import blp as StoreBlueprint
 from db import db
-import models
-import os
 
 
 def create_app(db_url=None):

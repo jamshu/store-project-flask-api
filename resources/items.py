@@ -1,6 +1,3 @@
-from flask import request
-from db import items
-import uuid
 from flask_smorest import abort, Blueprint
 from flask.views import MethodView
 from schemas import ItemSchema, ItemUpdateSchema

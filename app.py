@@ -5,6 +5,7 @@ from resources.items import blp as ItemBlueprint
 from resources.stores import blp as StoreBlueprint
 
 from db import db
+from flask_migrate import Migrate
 
 from resources.tag import blp as TagBlueprint
 from resources.user import blp as UserBlueprint
@@ -23,6 +24,7 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url or "sqlite:///data.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
+    Migrate(app, db)
 
     api = Api(app)
     app.config["JWT_SECRET_KEY"] = "jamshid-123"
@@ -56,8 +58,8 @@ def create_app(db_url=None):
             401,
         )
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)

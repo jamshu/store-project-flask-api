@@ -1,6 +1,5 @@
 .venv
 .env
-migrations
 instance
 models/__pycache__
 resources/__pycache__

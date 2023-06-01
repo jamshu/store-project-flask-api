@@ -7,3 +7,4 @@ flask-jwt-extended
 passlib
 Flask-Migrate==3.1.0
 gunicorn
+psycopg2
